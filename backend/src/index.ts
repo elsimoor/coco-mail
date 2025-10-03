@@ -9,6 +9,7 @@ dotenv.config();
 
 async function start() {
   const app = express();
+  const db = await connectToDatabase();
 
   app.use(cors());
   app.use(express.json());
