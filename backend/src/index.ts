@@ -1,46 +1,32 @@
-import express from "express";
-import { ApolloServer } from "apollo-server-express";
-import { readFileSync } from "fs";
-import path from "path";
-import { makeExecutableSchema } from "@graphql-tools/schema";
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import emailRoutes from './routes/emailRoutes';
+import noteRoutes from './routes/noteRoutes';
+import fileRoutes from './routes/fileRoutes';
 
-const typeDefs = readFileSync(path.join(__dirname, "../../shared/schema.graphql"), "utf-8");
-
-const resolvers = {
-  Query: {
-    me: () => null,
-    users: () => [],
-    messagesWith: () => []
-  },
-  Mutation: {
-    register: (_: any, args: any) => {
-      return { id: "1", email: args.email, name: args.name, roles: ["user"], createdAt: new Date().toISOString() };
-    },
-    login: (_: any, args: any) => {
-      return "JWT-TOKEN-PLACEHOLDER";
-    },
-    sendMessage: (_: any, args: any) => {
-      return { id: "m1", senderId: "1", receiverId: args.receiverId, ciphertext: args.ciphertext, createdAt: new Date().toISOString() };
-    }
-  }
-};
+dotenv.config();
 
 async function start() {
   const app = express();
 
-  const schema = makeExecutableSchema({ typeDefs, resolvers });
+  app.use(cors());
+  app.use(express.json());
 
-  const server = new ApolloServer({ schema });
-  await server.start();
+  app.use('/api/emails', emailRoutes);
+  app.use('/api/notes', noteRoutes);
+  app.use('/api/files', fileRoutes);
 
-  server.applyMiddleware({ app, path: "/graphql" });
+  app.get('/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
 
   const port = process.env.PORT || 4000;
   app.listen(port, () => {
-    console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`);
+    console.log(`Server ready at http://localhost:${port}`);
   });
 }
 
 start().catch((err) => {
-  console.error(err);
+  console.error('Failed to start server:', err);
 });
