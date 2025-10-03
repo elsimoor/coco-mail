@@ -1,0 +1,25 @@
+{
+  "name": "cocoinbox-monorepo",
+  "version": "1.0.0",
+  "description": "Cocoinbox - Privacy-focused super-application",
+  "private": true,
+  "scripts": {
+    "install:all": "cd frontend && npm install && cd ../backend && npm install",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "build": "npm run build:backend && npm run build:frontend",
+    "start:frontend": "cd frontend && npm start",
+    "start:backend": "cd backend && npm start"
+  },
+  "keywords": [
+    "privacy",
+    "security",
+    "ephemeral-email",
+    "secure-notes",
+    "file-sharing"
+  ],
+  "author": "Cocoinbox Team",
+  "license": "MIT"
+}
