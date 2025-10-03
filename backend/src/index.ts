@@ -1,36 +1,30 @@
 import express from "express";
 import { ApolloServer } from "apollo-server-express";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 import { readFileSync } from "fs";
 import path from "path";
 import { makeExecutableSchema } from "@graphql-tools/schema";
+import { connectToDatabase } from "./db";
+import { getUser } from "./auth";
+import resolvers from "./resolvers";
 
 const typeDefs = readFileSync(path.join(__dirname, "../../shared/schema.graphql"), "utf-8");
 
-const resolvers = {
-  Query: {
-    me: () => null,
-    users: () => [],
-    messagesWith: () => []
-  },
-  Mutation: {
-    register: (_: any, args: any) => {
-      return { id: "1", email: args.email, name: args.name, roles: ["user"], createdAt: new Date().toISOString() };
-    },
-    login: (_: any, args: any) => {
-      return "JWT-TOKEN-PLACEHOLDER";
-    },
-    sendMessage: (_: any, args: any) => {
-      return { id: "m1", senderId: "1", receiverId: args.receiverId, ciphertext: args.ciphertext, createdAt: new Date().toISOString() };
-    }
-  }
-};
-
 async function start() {
   const app = express();
+  const db = await connectToDatabase();
 
   const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-  const server = new ApolloServer({ schema });
+  const server = new ApolloServer({
+    schema,
+    context: async ({ req }) => {
+      const user = await getUser(req, db);
+      return { db, req, user };
+    },
+  });
   await server.start();
 
   server.applyMiddleware({ app, path: "/graphql" });

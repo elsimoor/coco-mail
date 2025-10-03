@@ -4,7 +4,7 @@
 This checklist contains the initial inferred features for Cocoinbox. I will update statuses as features are implemented.
 
 features:
-- Authentication & Authorization: todo
+- Authentication & Authorization: done
 - End-to-End Encrypted Messaging: todo
 - Secure File Storage: todo
 - Wallet / Payments: todo

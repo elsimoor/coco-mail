@@ -1,19 +1,37 @@
 import React from "react";
+import { useAuth } from "../context/AuthContext";
+import Link from "next/link";
 
 type Props = {
   title?: string;
 };
 
 export default function Navbar({ title }: Props) {
+  const { user, logout, loading } = useAuth();
+
   return (
     <header className="navbar">
       <div className="left">
         <button className="hamburger" aria-label="Open Menu">☰</button>
         <div className="title">{title || "Cocoinbox"}</div>
       </div>
-      <div className="right">
+      <div className="right" style={{ display: 'flex', gap: '1rem' }}>
         <button>🔔</button>
-        <button>Profile</button>
+        {!loading && (
+          <>
+            {user ? (
+              <>
+                <span>{user.name}</span>
+                <button onClick={logout}>Logout</button>
+              </>
+            ) : (
+              <>
+                <Link href="/login">Login</Link>
+                <Link href="/register">Register</Link>
+              </>
+            )}
+          </>
+        )}
       </div>
       <style jsx>{`
         .navbar {
