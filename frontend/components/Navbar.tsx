@@ -1,19 +1,13 @@
 import React from "react";
-import { useAuth } from "../contexts/AuthContext";
-import { useRouter } from "next/router";
+import { useAuth } from "../context/AuthContext";
+import Link from "next/link";
 
 type Props = {
   title?: string;
 };
 
 export default function Navbar({ title }: Props) {
-  const { user, signOut } = useAuth();
-  const router = useRouter();
-
-  const handleSignOut = async () => {
-    await signOut();
-    router.push('/');
-  };
+  const { user, logout, loading } = useAuth();
 
   return (
     <header className="navbar">
@@ -21,11 +15,21 @@ export default function Navbar({ title }: Props) {
         <button className="hamburger" aria-label="Open Menu">☰</button>
         <div className="title">{title || "Cocoinbox"}</div>
       </div>
-      <div className="right">
-        {user && (
+      <div className="right" style={{ display: 'flex', gap: '1rem' }}>
+        <button>🔔</button>
+        {!loading && (
           <>
-            <span className="user-email">{user.email}</span>
-            <button onClick={handleSignOut} className="sign-out-btn">Sign Out</button>
+            {user ? (
+              <>
+                <span>{user.name}</span>
+                <button onClick={logout}>Logout</button>
+              </>
+            ) : (
+              <>
+                <Link href="/login">Login</Link>
+                <Link href="/register">Register</Link>
+              </>
+            )}
           </>
         )}
       </div>
@@ -42,48 +46,10 @@ export default function Navbar({ title }: Props) {
           top: 0;
           z-index: 40;
         }
-        .left {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .title {
-          font-weight: 600;
-          font-size: 18px;
-        }
-        .right {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
-        .user-email {
-          color: #64748b;
-          font-size: 14px;
-        }
-        .sign-out-btn {
-          background: #ef4444;
-          color: white;
-          border: none;
-          padding: 8px 16px;
-          border-radius: 6px;
-          font-size: 14px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: background 0.2s;
-        }
-        .sign-out-btn:hover {
-          background: #dc2626;
-        }
-        .hamburger {
-          display: none;
-          background: transparent;
-          border: none;
-          font-size: 24px;
-          cursor: pointer;
-        }
+        .left { display: flex; align-items: center; gap: 12px; }
+        .hamburger { display: none; }
         @media (max-width: 900px) {
           .hamburger { display: inline-block; }
-          .user-email { display: none; }
         }
       `}</style>
     </header>

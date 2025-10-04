@@ -1,157 +1,79 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Layout } from '../components/Layout';
+import { gql, useMutation } from '@apollo/client';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { useAuth } from '../contexts/AuthContext';
 
-export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+const LOGIN_MUTATION = gql`
+  mutation Login($email: String!, $password: String!) {
+    login(email: $email, password: $password)
+  }
+`;
+
+const LoginPage = () => {
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const [login, { data, loading, error }] = useMutation(LOGIN_MUTATION, {
+    onCompleted: (data) => {
+      localStorage.setItem('token', data.login);
+      router.push('/');
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    const { error } = await signIn(email, password);
-
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-    } else {
-      router.push('/dashboard');
-    }
+    login({ variables: { email, password } });
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <h1>Welcome Back</h1>
-        <p className="subtitle">Sign in to your Cocoinbox account</p>
-
-        {error && <div className="error">{error}</div>}
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Email</label>
+    <Layout>
+      <div className="flex justify-center items-center h-full">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md"
+        >
+          <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+              Email
+            </label>
             <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="email"
               type="email"
+              placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="you@example.com"
             />
           </div>
-
-          <div className="form-group">
-            <label>Password</label>
+          <div className="mb-6">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+              Password
+            </label>
             <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+              id="password"
               type="password"
+              placeholder="******************"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="Enter your password"
             />
           </div>
-
-          <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
+          {error && <p className="text-red-500 text-xs italic">{error.message}</p>}
+          <div className="flex items-center justify-between">
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? 'Logging in...' : 'Login'}
+            </button>
+          </div>
         </form>
-
-        <p className="footer-text">
-          Don't have an account? <Link href="/signup">Sign up</Link>
-        </p>
       </div>
-
-      <style jsx>{`
-        .auth-page {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
-          padding: 20px;
-        }
-        .auth-card {
-          background: white;
-          padding: 48px;
-          border-radius: 16px;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-          width: 100%;
-          max-width: 440px;
-        }
-        h1 {
-          margin: 0 0 8px 0;
-          font-size: 32px;
-          color: #1e293b;
-        }
-        .subtitle {
-          margin: 0 0 32px 0;
-          color: #64748b;
-        }
-        .error {
-          background: #fee;
-          color: #c00;
-          padding: 12px;
-          border-radius: 8px;
-          margin-bottom: 20px;
-          font-size: 14px;
-        }
-        .form-group {
-          margin-bottom: 20px;
-        }
-        label {
-          display: block;
-          margin-bottom: 8px;
-          font-weight: 600;
-          color: #334155;
-        }
-        input {
-          width: 100%;
-          padding: 12px;
-          border: 2px solid #e2e8f0;
-          border-radius: 8px;
-          font-size: 16px;
-          transition: border-color 0.2s;
-        }
-        input:focus {
-          outline: none;
-          border-color: #2563eb;
-        }
-        .btn-primary {
-          width: 100%;
-          background: #2563eb;
-          color: white;
-          border: none;
-          padding: 14px;
-          border-radius: 8px;
-          font-size: 16px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: background 0.2s;
-        }
-        .btn-primary:hover:not(:disabled) {
-          background: #1d4ed8;
-        }
-        .btn-primary:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-        .footer-text {
-          text-align: center;
-          margin-top: 24px;
-          color: #64748b;
-        }
-        .footer-text a {
-          color: #2563eb;
-          text-decoration: none;
-          font-weight: 600;
-        }
-      `}</style>
-    </div>
+    </Layout>
   );
-}
+};
+
+export default LoginPage;

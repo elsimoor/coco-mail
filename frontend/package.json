@@ -12,7 +12,9 @@
     "next": "14.x",
     "react": "18.x",
     "react-dom": "18.x",
-    "@supabase/supabase-js": "^2.39.0"
+    "@apollo/client": "^3.8.0",
+    "graphql": "^16.0.0",
+    "swr": "^2.0.0"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
